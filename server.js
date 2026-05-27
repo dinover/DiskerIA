@@ -1032,8 +1032,10 @@ app.post('/api/download', async (req, res) => {
         const sess = dlSessions.get(sessionId);
         if (sess) sess.files.push(filename);
       }
+      console.log(`[OK] (${i+1}/${songs.length}) ${s.artist} – ${s.title}`);
       send({ type: 'done', index: i, filename: filename || null });
     } catch (e) {
+      console.log(`[FAIL] (${i+1}/${songs.length}) ${s.artist} – ${s.title}`);
       send({ type: 'error', index: i, error: e.message });
     }
   }
