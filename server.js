@@ -17,9 +17,10 @@ const TOOLS_DIR = IS_WIN
   ? path.join(os.homedir(), 'AppData', 'Roaming', 'DiskerIA')
   : path.join(__dirname, 'bin');
 
-const YTDLP  = path.join(TOOLS_DIR, IS_WIN ? 'yt-dlp.exe' : 'yt-dlp');
-const FFMPEG = path.join(TOOLS_DIR, IS_WIN ? 'ffmpeg.exe' : 'ffmpeg');
-const DENO   = path.join(TOOLS_DIR, IS_WIN ? 'deno.exe'   : 'deno');
+const YTDLP   = path.join(TOOLS_DIR, IS_WIN ? 'yt-dlp.exe'   : 'yt-dlp');
+const FFMPEG  = path.join(TOOLS_DIR, IS_WIN ? 'ffmpeg.exe'  : 'ffmpeg');
+const DENO    = path.join(TOOLS_DIR, IS_WIN ? 'deno.exe'    : 'deno');
+const COOKIES = path.join(TOOLS_DIR, 'cookies.txt');
 
 // ─── Credentials ───────────────────────────────────────────────────────────────
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || 'c56aa2a8e834483099301cb5e93bf145';
@@ -152,6 +153,7 @@ function downloadSong(searchQuery, outDir) {
       '--no-playlist', '--restrict-filenames',
       '--extractor-args', 'youtube:player_client=ios,mweb',
       '--socket-timeout', '30',
+      ...(fs.existsSync(COOKIES) ? ['--cookies', COOKIES] : []),
       '-o', path.join(outDir, '%(title)s.%(ext)s'),
       `ytsearch1:${searchQuery}`,
     ];
