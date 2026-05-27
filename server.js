@@ -144,7 +144,7 @@ async function getSpotifyTracks(url) {
 }
 
 // ─── Downloader ────────────────────────────────────────────────────────────────
-function downloadSong(searchQuery, outDir) {
+function downloadSong(searchQuery, outDir, onProgress) {
   return new Promise((resolve, reject) => {
     const before = new Set(fs.readdirSync(outDir));
     const args   = [
@@ -166,8 +166,8 @@ function downloadSong(searchQuery, outDir) {
     }
     const proc = spawn(YTDLP, args);
     let output = '';
-    proc.stdout.on('data', d => { output += d; });
-    proc.stderr.on('data', d => { output += d; });
+    proc.stdout.on('data', d => { output += d; if (onProgress) onProgress(); });
+    proc.stderr.on('data', d => { output += d; if (onProgress) onProgress(); });
 
     const timer = setTimeout(() => {
       proc.kill('SIGKILL');
@@ -1038,7 +1038,9 @@ app.post('/api/download', async (req, res) => {
     const s = songs[i];
     send({ type: 'start', index: i, total: songs.length, label: `${s.artist} – ${s.title}` });
     try {
-      const filename = await downloadSong(s.searchQuery, outDir);
+      const filename = await downloadSong(s.searchQuery, outDir, () => {
+        try { res.write(': progress\n\n'); } catch {}
+      });
       if (sessionId && filename) {
         const sess = dlSessions.get(sessionId);
         if (sess) sess.files.push(filename);
