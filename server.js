@@ -152,12 +152,12 @@ function downloadSong(searchQuery, outDir) {
       '--ffmpeg-location', FFMPEG,
       '--no-playlist', '--restrict-filenames',
       '--extractor-args', 'youtube:player_client=tv_embedded,web',
+      '--js-runtimes', `node:${process.execPath}`,
       '--socket-timeout', '30',
       ...(fs.existsSync(COOKIES) ? ['--cookies', COOKIES] : []),
       '-o', path.join(outDir, '%(title)s.%(ext)s'),
       `ytsearch1:${searchQuery}`,
     ];
-    if (fs.existsSync(DENO)) args.splice(-1, 0, '--js-runtimes', `deno:${DENO}`);
     if (!fs.existsSync(YTDLP)) {
       const msg = `yt-dlp no encontrado en: ${YTDLP}`;
       console.error(`[yt-dlp] ${msg}`);
