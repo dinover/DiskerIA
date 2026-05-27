@@ -1021,6 +1021,7 @@ app.post('/api/download', async (req, res) => {
   res.flushHeaders();
 
   const send = obj => res.write(`data: ${JSON.stringify(obj)}\n\n`);
+  const keepalive = setInterval(() => res.write(': keepalive\n\n'), 20000);
   if (sessionId) send({ type: 'session', sessionId });
 
   for (let i = 0; i < songs.length; i++) {
@@ -1040,6 +1041,7 @@ app.post('/api/download', async (req, res) => {
     }
   }
 
+  clearInterval(keepalive);
   send({ type: 'complete', sessionId: sessionId || null });
   res.end();
 });
