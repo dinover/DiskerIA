@@ -154,6 +154,7 @@ function downloadSong(searchQuery, outDir) {
       '--extractor-args', 'youtube:player_client=tv_embedded,web',
       '--js-runtimes', `node:${process.execPath}`,
       '--socket-timeout', '30',
+      '--retries', '2',
       ...(fs.existsSync(COOKIES) ? ['--cookies', COOKIES] : []),
       '-o', path.join(outDir, '%(title)s.%(ext)s'),
       `ytsearch1:${searchQuery}`,
@@ -167,7 +168,15 @@ function downloadSong(searchQuery, outDir) {
     let output = '';
     proc.stdout.on('data', d => { output += d; });
     proc.stderr.on('data', d => { output += d; });
+
+    const timer = setTimeout(() => {
+      proc.kill('SIGKILL');
+      console.error(`[yt-dlp] TIMEOUT for "${searchQuery}"`);
+      reject(new Error('Timeout: la descarga tardó demasiado'));
+    }, 3 * 60 * 1000);
+
     proc.on('close', code => {
+      clearTimeout(timer);
       if (code !== 0) {
         console.error(`[yt-dlp] FAILED (${code}) for "${searchQuery}":\n${output.slice(-1000)}`);
         return reject(new Error(output.slice(-400)));
@@ -176,6 +185,7 @@ function downloadSong(searchQuery, outDir) {
       resolve(newFile);
     });
     proc.on('error', err => {
+      clearTimeout(timer);
       console.error(`[yt-dlp] spawn error for "${searchQuery}": ${err.message}`);
       reject(err);
     });
