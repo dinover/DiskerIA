@@ -35,6 +35,13 @@ else
   echo "==> ffmpeg ya existe, omitiendo."
 fi
 
+# ── cookies de YouTube (opcional) ─────────────────────────────────────────────
+if [ -n "$YOUTUBE_COOKIES" ]; then
+  echo "==> Escribiendo cookies de YouTube..."
+  printf '%s' "$YOUTUBE_COOKIES" > bin/cookies.txt
+  echo "    cookies OK"
+fi
+
 echo ""
 echo "Herramientas listas:"
 ls -lh bin/
