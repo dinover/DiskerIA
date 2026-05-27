@@ -151,7 +151,7 @@ function downloadSong(searchQuery, outDir) {
       '-x', '--audio-format', 'mp3', '--audio-quality', '0',
       '--ffmpeg-location', FFMPEG,
       '--no-playlist', '--restrict-filenames',
-      '--extractor-args', 'youtube:player_client=ios,mweb',
+      '--extractor-args', 'youtube:player_client=tv_embedded,web',
       '--socket-timeout', '30',
       ...(fs.existsSync(COOKIES) ? ['--cookies', COOKIES] : []),
       '-o', path.join(outDir, '%(title)s.%(ext)s'),
