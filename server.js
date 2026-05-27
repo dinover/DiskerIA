@@ -156,18 +156,27 @@ function downloadSong(searchQuery, outDir) {
       `ytsearch1:${searchQuery}`,
     ];
     if (fs.existsSync(DENO)) args.splice(-1, 0, '--js-runtimes', `deno:${DENO}`);
+    if (!fs.existsSync(YTDLP)) {
+      const msg = `yt-dlp no encontrado en: ${YTDLP}`;
+      console.error(`[yt-dlp] ${msg}`);
+      return reject(new Error(msg));
+    }
     const proc = spawn(YTDLP, args);
-    let stderr = '';
-    proc.stderr.on('data', d => { stderr += d; });
+    let output = '';
+    proc.stdout.on('data', d => { output += d; });
+    proc.stderr.on('data', d => { output += d; });
     proc.on('close', code => {
       if (code !== 0) {
-        console.error(`[yt-dlp] FAILED (${code}) for "${searchQuery}":\n${stderr.slice(-800)}`);
-        return reject(new Error(stderr.slice(-300)));
+        console.error(`[yt-dlp] FAILED (${code}) for "${searchQuery}":\n${output.slice(-1000)}`);
+        return reject(new Error(output.slice(-400)));
       }
       const newFile = fs.readdirSync(outDir).find(f => !before.has(f)) || null;
       resolve(newFile);
     });
-    proc.on('error', reject);
+    proc.on('error', err => {
+      console.error(`[yt-dlp] spawn error for "${searchQuery}": ${err.message}`);
+      reject(err);
+    });
   });
 }
 
@@ -784,7 +793,8 @@ document.getElementById('download-btn').addEventListener('click', async () => {
             const item = document.getElementById('song-'+msg.index);
             if (item) item.className = 'song-item is-error';
             const st = document.getElementById('status-'+msg.index);
-            if (st) st.textContent = '❌';
+            if (st) { st.textContent = '❌'; st.title = msg.error || ''; }
+            console.error('[diskeria] error canción', msg.index, msg.error);
           } else if (msg.type === 'complete') {
             progressFill.style.width = '100%';
             toast('Descarga completa', 'success');
@@ -972,6 +982,18 @@ app.post('/api/pick-folder', (req, res) => {
   fs.mkdirSync(selected, { recursive: true });
   saveConfig({ outDir: selected });
   res.json({ path: selected });
+});
+
+// ─── Tools status ──────────────────────────────────────────────────────────────
+app.get('/api/tools-status', (_, res) => {
+  res.json({
+    ytdlp:  { path: YTDLP,  exists: fs.existsSync(YTDLP)  },
+    ffmpeg: { path: FFMPEG, exists: fs.existsSync(FFMPEG) },
+    deno:   { path: DENO,   exists: fs.existsSync(DENO)   },
+    platform: process.platform,
+    cwd: process.cwd(),
+    dirname: __dirname,
+  });
 });
 
 // ─── Download ──────────────────────────────────────────────────────────────────
