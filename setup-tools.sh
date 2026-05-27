@@ -4,15 +4,12 @@ set -e
 mkdir -p bin
 
 # ── yt-dlp ────────────────────────────────────────────────────────────────────
-if [ ! -f bin/yt-dlp ]; then
-  echo "==> Descargando yt-dlp..."
-  curl -fsSL "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp" \
-    -o bin/yt-dlp
-  chmod +x bin/yt-dlp
-  echo "    yt-dlp OK ($(bin/yt-dlp --version))"
-else
-  echo "==> yt-dlp ya existe, omitiendo."
-fi
+# Siempre descarga la última versión para evitar bloqueos de YouTube
+echo "==> Descargando yt-dlp (última versión)..."
+curl -fsSL "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp" \
+  -o bin/yt-dlp
+chmod +x bin/yt-dlp
+echo "    yt-dlp OK ($(bin/yt-dlp --version))"
 
 # ── ffmpeg ────────────────────────────────────────────────────────────────────
 if [ ! -f bin/ffmpeg ]; then

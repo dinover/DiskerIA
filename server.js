@@ -150,6 +150,8 @@ function downloadSong(searchQuery, outDir) {
       '-x', '--audio-format', 'mp3', '--audio-quality', '0',
       '--ffmpeg-location', FFMPEG,
       '--no-playlist', '--restrict-filenames',
+      '--extractor-args', 'youtube:player_client=ios,mweb',
+      '--socket-timeout', '30',
       '-o', path.join(outDir, '%(title)s.%(ext)s'),
       `ytsearch1:${searchQuery}`,
     ];
@@ -158,7 +160,10 @@ function downloadSong(searchQuery, outDir) {
     let stderr = '';
     proc.stderr.on('data', d => { stderr += d; });
     proc.on('close', code => {
-      if (code !== 0) return reject(new Error(stderr.slice(-500)));
+      if (code !== 0) {
+        console.error(`[yt-dlp] FAILED (${code}) for "${searchQuery}":\n${stderr.slice(-800)}`);
+        return reject(new Error(stderr.slice(-300)));
+      }
       const newFile = fs.readdirSync(outDir).find(f => !before.has(f)) || null;
       resolve(newFile);
     });
@@ -782,12 +787,21 @@ document.getElementById('download-btn').addEventListener('click', async () => {
             if (st) st.textContent = '❌';
           } else if (msg.type === 'complete') {
             progressFill.style.width = '100%';
-            progressLabel.textContent = IS_DESKTOP ? '¡Listo! Revisá tu carpeta.' : '¡Listo! Descargá tus canciones.';
             toast('Descarga completa', 'success');
             if (!IS_DESKTOP && msg.sessionId) {
+              progressLabel.textContent = '¡Listo! Descargando ZIP...';
+              const zipUrl = '/zip/' + msg.sessionId;
               const zipBtn = document.getElementById('zip-btn');
-              zipBtn.href = '/zip/' + msg.sessionId;
+              zipBtn.href = zipUrl;
               zipBtn.style.display = 'inline-flex';
+              const a = document.createElement('a');
+              a.href = zipUrl;
+              a.download = 'diskeria-musica.zip';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+            } else {
+              progressLabel.textContent = '¡Listo! Revisá tu carpeta.';
             }
           }
         } catch {}
