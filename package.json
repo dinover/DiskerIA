@@ -1,0 +1,33 @@
+{
+  "name": "diskeria",
+  "version": "1.0.0",
+  "description": "Descarga música desde Spotify/YouTube como MP3",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "create-assets": "powershell -ExecutionPolicy Bypass -File create-assets.ps1",
+    "patch-exe": "powershell -ExecutionPolicy Bypass -File patch-exe.ps1",
+    "generate-assets": "node generate-assets.js",
+    "build": "npm run generate-assets && pkg server.js --target node18-win-x64 --output dist/DiskerIA.exe --icon assets/logo.ico && npm run patch-exe",
+    "deploy": "npm run build && powershell -ExecutionPolicy Bypass -File deploy.ps1",
+    "build-installer": "powershell -ExecutionPolicy Bypass -Command \"& \\\"$env:LOCALAPPDATA\\Programs\\Inno Setup 6\\ISCC.exe\\\" installer.iss\"",
+    "build-mac": "bash build-mac.sh",
+    "install-mac": "bash install-mac.sh"
+  },
+  "pkg": {
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist",
+    "assets": [
+      "assets/**/*"
+    ]
+  },
+  "dependencies": {
+    "archiver": "^8.0.0",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}

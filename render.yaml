@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: diskeria
+    runtime: node
+    buildCommand: npm install && bash setup-tools.sh
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REDIRECT_URI
+        sync: false   # lo completás en el dashboard con tu URL de Render
