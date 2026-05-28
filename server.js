@@ -1,7 +1,6 @@
 'use strict';
 const express  = require('express');
-const _archiverMod = require('archiver');
-const archiver = typeof _archiverMod === 'function' ? _archiverMod : _archiverMod.default || _archiverMod.create;
+const archiver = require('archiver');
 const { spawn, spawnSync } = require('child_process');
 const crypto   = require('crypto');
 const fs       = require('fs');
