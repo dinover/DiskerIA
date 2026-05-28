@@ -24,7 +24,7 @@
     ]
   },
   "dependencies": {
-    "archiver": "^8.0.0",
+    "archiver": "^6.0.0",
     "express": "^5.2.1"
   },
   "devDependencies": {
